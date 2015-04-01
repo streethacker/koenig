@@ -19,7 +19,7 @@ MYSQL_SETTINGS = {
 
 KOENIG_THRIFT_SETTINGS = {
     'host': 'localhost',
-    'port': 27021,    
+    'port': 27021,
 }
 
 
@@ -38,7 +38,7 @@ LOGGING_SETTINGS = {
     },
 
     'loggers': {
-        'alliance': {
+        'koenig': {
             'handlers': ['console'],
             'propagate': False,
             'level': 'INFO',
@@ -55,7 +55,7 @@ LOGGING_SETTINGS = {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'general',
-            'filename': '/var/log/alliance/alliance.log',
+            'filename': '/var/log/koenig/koenig.log',
         },
     },
 
