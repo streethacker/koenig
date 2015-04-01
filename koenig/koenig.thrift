@@ -213,7 +213,7 @@ service KoenigService {
             3: KoenigUnknownException unknown_exception
         )
 
-    double query_cpu_percent(1: i16 interval):
+    double query_cpu_percent(1: i16 interval)
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
