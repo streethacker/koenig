@@ -19,7 +19,7 @@ MYSQL_SETTINGS = {
 
 KOENIG_THRIFT_SETTINGS = {
     'host': 'localhost',
-    'port': 27021,
+    'port': 27028,
 }
 
 

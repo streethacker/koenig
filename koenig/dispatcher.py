@@ -7,6 +7,7 @@ from koenig.handler import (
     query,
 )
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -87,8 +88,12 @@ class KoenigDispatcher(object):
     def query_net_connections(self):
         return query.query_net_connections()
 
-    #################
-    # query user info
-    #################
+    ###################
+    # query login info
+    ###################
+
     def query_login_users(self):
         return query.query_login_users()
+
+    def query_boot_time(self):
+        return query.query_boot_time()

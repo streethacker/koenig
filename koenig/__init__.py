@@ -28,5 +28,5 @@ from koenig.client import (
 
 
 @contextlib.contextmanager
-def koenig_client():
-    yield client()
+def koenig_client(host=None, port=None):
+    yield client(host, port)

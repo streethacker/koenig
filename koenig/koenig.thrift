@@ -11,7 +11,6 @@ enum KoenigErrorCode {
     ACCESS_DENIED,
     
     // SystemErrors
-    PLATFORM_NOT_SUPPORT,    
     PROCESS_NOT_FOUND,
 }
 
@@ -139,8 +138,8 @@ struct TDiskIOCounters {
 */
 
 struct TNetworkAddress {
-    1: required string ip,
-    2: required i32 port,    
+    1: optional string ip,
+    2: optional i32 port,
 }
 
 
@@ -263,7 +262,7 @@ service KoenigService {
     * query disk info
     */
 
-    TDiskPartition query_disk_partitions()
+    list<TDiskPartition> query_disk_partitions()
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
@@ -277,7 +276,7 @@ service KoenigService {
             3: KoenigUnknownException unknown_exception
         )
 
-    TDiskIOCounters query_disk_io_counters_perdisk()
+    map<string, TDiskIOCounters> query_disk_io_counters_perdisk()
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
@@ -317,10 +316,17 @@ service KoenigService {
         )
 
     /**
-    * query login users
+    * query login info
     */
 
     list<TUser> query_login_users()
+        throws (
+            1: KoenigUserException user_exception,
+            2: KoenigSystemException system_exception,
+            3: KoenigUnknownException unknown_exception
+        )
+
+    string query_boot_time()
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,

@@ -13,11 +13,14 @@ from koenig.settings import (
 )
 
 
-def client():
+def client(host=None, port=None):
+    host = host or KOENIG_THRIFT_SETTINGS['host']
+    port = port or KOENIG_THRIFT_SETTINGS['port']
+
     return make_client(
         koenig_thrift.KoenigService,
-        KOENIG_THRIFT_SETTINGS['host'],
-        KOENIG_THRIFT_SETTINGS['port']
+        host,
+        port
     )
 
 

@@ -21,11 +21,15 @@ from koenig.settings import (
 
 logger = logging.getLogger(__name__)
 
-server = make_server(
-    koenig_thrift.KoenigService,
-    KoenigDispatcher(),
-    KOENIG_THRIFT_SETTINGS['host'],
-    KOENIG_THRIFT_SETTINGS['port']
-)
 
-server.serve()
+def server(host=None, port=None):
+    host = host or KOENIG_THRIFT_SETTINGS['host']
+    port = port or KOENIG_THRIFT_SETTINGS['port']
+    return make_server(
+        koenig_thrift.KoenigService,
+        KoenigDispatcher(),
+        host,
+        port
+    )
+
+server().serve()
