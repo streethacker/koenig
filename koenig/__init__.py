@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import thriftpy
-import contextlib
 
 import os
 
@@ -23,10 +22,9 @@ config.dictConfig(LOGGING_SETTINGS)
 
 
 from koenig.client import (
-    client,
+    make_client,
 )
 
 
-@contextlib.contextmanager
 def koenig_client(host=None, port=None):
-    yield client(host, port)
+    return make_client(host, port)

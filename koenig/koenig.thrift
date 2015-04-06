@@ -332,4 +332,15 @@ service KoenigService {
             2: KoenigSystemException system_exception,
             3: KoenigUnknownException unknown_exception
         )
+
+    /**
+    * query process info
+    */
+
+    list<i32> query_pids()
+        throws (
+            1: KoenigUserException user_exception,
+            2: KoenigSystemException system_exception,
+            3: KoenigUnknownException unknown_exception
+        )
 }

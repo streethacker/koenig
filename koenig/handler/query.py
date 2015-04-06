@@ -138,3 +138,7 @@ def query_login_users():
 def query_boot_time():
     boot_time = psutil.boot_time()
     return datetime.fromtimestamp(boot_time).strftime('%Y-%m-%d %H:%M:%S')
+
+
+def query_pids():
+    return psutil.pids()

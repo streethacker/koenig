@@ -97,3 +97,10 @@ class KoenigDispatcher(object):
 
     def query_boot_time(self):
         return query.query_boot_time()
+
+    ####################
+    # query process info
+    ####################
+
+    def query_pids(self):
+        return query.query_pids()

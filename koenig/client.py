@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from thriftpy.rpc import (
-    make_client,
+    client_context,
 )
 
 from koenig import (
@@ -13,11 +13,11 @@ from koenig.settings import (
 )
 
 
-def client(host=None, port=None):
+def make_client(host=None, port=None):
     host = host or KOENIG_THRIFT_SETTINGS['host']
     port = port or KOENIG_THRIFT_SETTINGS['port']
 
-    return make_client(
+    return client_context(
         koenig_thrift.KoenigService,
         host,
         port
@@ -25,5 +25,5 @@ def client(host=None, port=None):
 
 
 if __name__ == '__main__':
-    if client().ping():
+    if make_client().ping():
         print 'server run ok'
