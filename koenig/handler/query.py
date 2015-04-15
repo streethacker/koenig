@@ -9,6 +9,7 @@ from datetime import (
 
 from psutil import (
     AccessDenied,
+    NoSuchProcess,
 )
 
 from koenig import (
@@ -17,27 +18,49 @@ from koenig import (
 
 from koenig.exc import (
     raise_user_exc,
+    raise_system_exc,
     KoenigErrorCode,
 )
 
 from koenig.utils import (
-    serialize_to_ttype,
-    serialize_to_ttype_list,
-    serialize_to_ttype_dict,
+    serialize,
 )
 
 
 logger = logging.getLogger(__name__)
 
 
+def __extend_process(process):
+    attrs = {
+        'pid': process.pid,
+        'ppid': process.ppid(),
+        'name': process.name(),
+        'username': process.username(),
+        'create_time': process.create_time(),
+        'cpu_percent': process.cpu_percent(),
+        'memory_percent': process.memory_percent(),
+        'cwd': process.cwd(),
+        'status': process.status(),
+        'exe': process.exe(),
+    }
+
+    attrs['uids'] = serialize(process.uids(), koenig_thrift.TProcessUID)
+    attrs['gids'] = serialize(process.gids(), koenig_thrift.TProcessGID)
+
+    process.__dict__.clear()
+    process.__dict__.update(attrs)
+
+    return process
+
+
 def query_cpu_times():
     cpu_times = psutil.cpu_times()
-    return serialize_to_ttype(cpu_times, koenig_thrift.TCpuTimes)
+    return serialize(cpu_times, koenig_thrift.TCPUTimes)
 
 
 def query_cpu_times_percpu():
     cpu_times_percpu = psutil.cpu_times(percpu=True)
-    return serialize_to_ttype_list(cpu_times_percpu, koenig_thrift.TCpuTimes)
+    return serialize(cpu_times_percpu, koenig_thrift.TCPUTimes, _list=True)
 
 
 def query_cpu_percent(interval):
@@ -52,59 +75,62 @@ def query_cpu_percent_percpu(interval):
 
 def query_cpu_times_percent(interval):
     cpu_times_percent = psutil.cpu_times_percent()
-    return serialize_to_ttype(
+    return serialize(
         cpu_times_percent,
-        koenig_thrift.TCpuTimesPercent
+        koenig_thrift.TCPUTimesPercent
     )
 
 
 def query_cpu_times_percent_percpu(interval):
     cpu_times_percent_percpu = psutil.cpu_times_percent(percpu=True)
-    return serialize_to_ttype_list(
+    return serialize(
         cpu_times_percent_percpu,
-        koenig_thrift.TCpuTimesPercent
+        koenig_thrift.TCPUTimesPercent,
+        _list=True
     )
 
 
 def query_virtual_memory():
     virtual_memory = psutil.virtual_memory()
-    return serialize_to_ttype(virtual_memory, koenig_thrift.TVirtualMemory)
+    return serialize(virtual_memory, koenig_thrift.TVirtualMemory)
 
 
 def query_swap_memory():
     swap_memory = psutil.swap_memory()
-    return serialize_to_ttype(swap_memory, koenig_thrift.TSwapMemory)
+    return serialize(swap_memory, koenig_thrift.TSwapMemory)
 
 
 def query_disk_partitions():
     disk_partitions = psutil.disk_partitions()
-    return serialize_to_ttype_list(
+    return serialize(
         disk_partitions,
-        koenig_thrift.TDiskPartition
+        koenig_thrift.TDiskPartition,
+        _list=True
     )
 
 
 def query_disk_io_counters():
     disk_io_counters = psutil.disk_io_counters()
-    return serialize_to_ttype(disk_io_counters, koenig_thrift.TDiskIOCounters)
+    return serialize(disk_io_counters, koenig_thrift.TDiskIOCounters)
 
 
 def query_disk_io_counters_perdisk():
     disk_io_counters_perdisk = psutil.disk_io_counters(perdisk=True)
-    return serialize_to_ttype_dict(
+    return serialize(
         disk_io_counters_perdisk,
-        koenig_thrift.TDiskIOCounters
+        koenig_thrift.TDiskIOCounters,
+        _map=True
     )
 
 
 def query_disk_usage(path):
     disk_usage = psutil.disk_usage(path)
-    return serialize_to_ttype(disk_usage, koenig_thrift.TDiskUsage)
+    return serialize(disk_usage, koenig_thrift.TDiskUsage)
 
 
 def query_net_io_counters():
     net_io_counters = psutil.net_io_counters()
-    return serialize_to_ttype(
+    return serialize(
         net_io_counters,
         koenig_thrift.TNetworkIOCounters
     )
@@ -112,9 +138,10 @@ def query_net_io_counters():
 
 def query_net_io_counters_pernic():
     net_io_counters_pernic = psutil.net_io_counters(pernic=True)
-    return serialize_to_ttype_dict(
+    return serialize(
         net_io_counters_pernic,
-        koenig_thrift.TNetworkIOCounters
+        koenig_thrift.TNetworkIOCounters,
+        _map=True
     )
 
 
@@ -124,15 +151,16 @@ def query_net_connections():
     except AccessDenied:
         raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
 
-    return serialize_to_ttype_list(
+    return serialize(
         net_connections,
-        koenig_thrift.TNetworkConnections
+        koenig_thrift.TNetworkConnections,
+        _list=True
     )
 
 
 def query_login_users():
     login_users = psutil.users()
-    return serialize_to_ttype_list(login_users, koenig_thrift.TUser)
+    return serialize(login_users, koenig_thrift.TUser, _list=True)
 
 
 def query_boot_time():
@@ -142,3 +170,39 @@ def query_boot_time():
 
 def query_pids():
     return psutil.pids()
+
+
+def query_process_by_pid(pid):
+
+    try:
+        process = psutil.Process(pid)
+    except AccessDenied:
+        raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
+    except NoSuchProcess:
+        raise_system_exc(KoenigErrorCode.PROCESS_NOT_FOUND)
+
+    process = __extend_process(process)
+
+    return serialize(process, koenig_thrift.TProcess)
+
+
+def query_processes_by_pids(pids):
+
+    def __gen_process(pids):
+        for pid in pids:
+            try:
+                process = psutil.Process(pid)
+            except AccessDenied:
+                raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
+            except NoSuchProcess:
+                raise_system_exc(KoenigErrorCode.PROCESS_NOT_FOUND)
+
+            process = __extend_process(process)
+
+            yield (pid, process)
+
+    result = {}
+    for pid, process in __gen_process(pids):
+        result.update({pid: process})
+
+    return serialize(result, koenig_thrift.TProcess, _map=True)

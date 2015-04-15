@@ -9,6 +9,7 @@ enum KoenigErrorCode {
     
     // UserErrors
     ACCESS_DENIED,
+    PARAMETER_INVALID,
     
     // SystemErrors
     PROCESS_NOT_FOUND,
@@ -41,7 +42,7 @@ exception KoenigUnknownException {
 * CPU
 */
 
-struct TCpuTimes {
+struct TCPUTimes {
     1: required double user,
     2: required double system,
     3: required double idle,
@@ -57,7 +58,7 @@ struct TCpuTimes {
 }
 
 
-struct TCpuTimesPercent {
+struct TCPUTimesPercent {
     1: required double user,
     2: required double system,
     3: required double idle,
@@ -182,6 +183,38 @@ struct TUser {
 
 
 /**
+* PROCESSES
+*/
+
+struct TProcessUID {
+    1: required i32 real,
+    2: required i32 effective,
+    3: required i32 saved,    
+}
+
+struct TProcessGID {
+    1: required i32 real,
+    2: required i32 effective,
+    3: required i32 saved,    
+}
+
+struct TProcess {
+    1: required i32 pid,
+    2: required i32 ppid,
+    3: required string name,
+    4: required string username,
+    5: required double create_time,
+    6: required double cpu_percent,
+    7: required double memory_percent,
+    8: required string cwd,
+    9: required string status,
+    10: required string exe,
+    11: required TProcessUID uids,
+    12: required TProcessGID gids,    
+}
+
+
+/**
 * Services
 **/
 
@@ -198,14 +231,14 @@ service KoenigService {
     * query cpu info
     */
 
-    TCpuTimes query_cpu_times()
+    TCPUTimes query_cpu_times()
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
             3: KoenigUnknownException unknown_exception
         )
 
-    list<TCpuTimes> query_cpu_times_percpu()
+    list<TCPUTimes> query_cpu_times_percpu()
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
@@ -226,14 +259,14 @@ service KoenigService {
             3: KoenigUnknownException unknown_exception
         )
 
-    TCpuTimesPercent query_cpu_times_percent(1: i16 interval)
+    TCPUTimesPercent query_cpu_times_percent(1: i16 interval)
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
             3: KoenigUnknownException unknown_exception
         )
 
-    list<TCpuTimesPercent> query_cpu_times_percent_percpu(1: i16 interval)
+    list<TCPUTimesPercent> query_cpu_times_percent_percpu(1: i16 interval)
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,
@@ -338,6 +371,20 @@ service KoenigService {
     */
 
     list<i32> query_pids()
+        throws (
+            1: KoenigUserException user_exception,
+            2: KoenigSystemException system_exception,
+            3: KoenigUnknownException unknown_exception
+        )
+
+    TProcess query_process_by_pid(1: i32 pid)
+        throws (
+            1: KoenigUserException user_exception,
+            2: KoenigSystemException system_exception,
+            3: KoenigUnknownException unknown_exception
+        )
+
+    map<i32, TProcess> query_processes_by_pids(1: list<i32> pids)
         throws (
             1: KoenigUserException user_exception,
             2: KoenigSystemException system_exception,

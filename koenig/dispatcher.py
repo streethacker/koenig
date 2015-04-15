@@ -104,3 +104,9 @@ class KoenigDispatcher(object):
 
     def query_pids(self):
         return query.query_pids()
+
+    def query_process_by_pid(self, pid):
+        return query.query_process_by_pid(pid)
+
+    def query_processes_by_pids(self, pids):
+        return query.query_processes_by_pids(pids)

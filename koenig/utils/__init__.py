@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from functools import (
     partial,
 )
@@ -8,26 +10,48 @@ from koenig import (
     koenig_thrift,
 )
 
+from koenig.exc import (
+    raise_user_exc,
+    KoenigErrorCode,
+)
 
-def serialize_to_ttype(obj, ttype):
+
+logger = logging.getLogger(__name__)
+
+
+def __serialize(obj, ttype):
     tobj = ttype()
     for key, val in obj.__dict__.iteritems():
-        if isinstance(val, tuple):
+        if key.startswith('_'):
+            continue
+        if isinstance(val, tuple) and key in ('laddr', 'raddr'):
             val = koenig_thrift.TNetworkAddress(*val)
         setattr(tobj, key, val)
 
     return tobj
 
 
-def serialize_to_ttype_list(obj_list, ttype):
-    serialize = partial(serialize_to_ttype, ttype=ttype)
+def __serialize_list(obj_list, ttype):
 
-    result = [serialize(obj) for obj in obj_list]
-    return result
+    if not isinstance(obj_list, (list, tuple)):
+        raise_user_exc(KoenigErrorCode.PARAMETER_INVALID)
+
+    func = partial(__serialize, ttype=ttype)
+    return [func(obj) for obj in obj_list]
 
 
-def serialize_to_ttype_dict(obj_dict, ttype):
-    serialize = partial(serialize_to_ttype, ttype=ttype)
+def __serialize_dict(obj_dict, ttype):
 
-    result = {k: serialize(obj) for k, obj in obj_dict.iteritems()}
-    return result
+    if not isinstance(obj_dict, dict):
+        raise_user_exc(KoenigErrorCode.PARAMETER_INVALID)
+
+    func = partial(__serialize, ttype=ttype)
+    return {k: func(obj) for k, obj in obj_dict.iteritems()}
+
+
+def serialize(obj, ttype, _list=False, _map=False):
+    if _list:
+        return __serialize_list(obj, ttype)
+    if _map:
+        return __serialize_dict(obj, ttype)
+    return __serialize(obj, ttype)
