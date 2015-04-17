@@ -11,9 +11,10 @@ KoenigSystemException = koenig_thrift.KoenigSystemException
 
 TRANSLATIONS = {
     KoenigErrorCode.ACCESS_DENIED: u'需要sudo权限',
-    KoenigErrorCode.PARAMETER_INVALID: u'参数不合法',
+    KoenigErrorCode.DISK_PATH_NOT_FOUND: u'指定的磁盘路径不存在',
+    KoenigErrorCode.PARAMETER_TYPE_INVALID: u'参数类型不匹配',
     KoenigErrorCode.PROCESS_NOT_FOUND: u'指定的pid未找到',
-    KoenigErrorCode.UNKNOWN_ERROR: u'未知的系统错误',
+    KoenigErrorCode.UNKNOWN_ERROR: u'未知的错误',
 }
 
 

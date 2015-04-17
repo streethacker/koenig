@@ -34,7 +34,7 @@ def __serialize(obj, ttype):
 def __serialize_list(obj_list, ttype):
 
     if not isinstance(obj_list, (list, tuple)):
-        raise_user_exc(KoenigErrorCode.PARAMETER_INVALID)
+        raise_user_exc(KoenigErrorCode.PARAMETER_TYPE_INVALID)
 
     func = partial(__serialize, ttype=ttype)
     return [func(obj) for obj in obj_list]
@@ -43,7 +43,7 @@ def __serialize_list(obj_list, ttype):
 def __serialize_dict(obj_dict, ttype):
 
     if not isinstance(obj_dict, dict):
-        raise_user_exc(KoenigErrorCode.PARAMETER_INVALID)
+        raise_user_exc(KoenigErrorCode.PARAMETER_TYPE_INVALID)
 
     func = partial(__serialize, ttype=ttype)
     return {k: func(obj) for k, obj in obj_dict.iteritems()}

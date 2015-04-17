@@ -1,5 +1,5 @@
 help:
-	@echo 'Makefile for alliance                    '
+	@echo 'Makefile for koenig                    '
 	@echo '                                         '
 	@echo 'Usage:                                   '
 	@echo '    make develop    make a develop env   '

@@ -124,7 +124,11 @@ def query_disk_io_counters_perdisk():
 
 
 def query_disk_usage(path):
-    disk_usage = psutil.disk_usage(path)
+    try:
+        disk_usage = psutil.disk_usage(path)
+    except OSError:
+        raise_user_exc(KoenigErrorCode.DISK_PATH_NOT_FOUND)
+
     return serialize(disk_usage, koenig_thrift.TDiskUsage)
 
 

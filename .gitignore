@@ -53,10 +53,10 @@ docs/_build/
 # PyBuilder
 target/
 
-# Alliance.
-alliance_settings.py
+# Koenig.
 install.record
 .commit
 .tags
 *.swp
 *.swo
+.DS_Store

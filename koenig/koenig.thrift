@@ -9,7 +9,8 @@ enum KoenigErrorCode {
     
     // UserErrors
     ACCESS_DENIED,
-    PARAMETER_INVALID,
+    DISK_PATH_NOT_FOUND,
+    PARAMETER_TYPE_INVALID,
     
     // SystemErrors
     PROCESS_NOT_FOUND,
