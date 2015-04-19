@@ -1,5 +1,7 @@
 namespace py koenig
 
+const i32 KERNEL_TASK_PID = 0
+
 /**
 * Exceptions
 */

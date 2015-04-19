@@ -41,8 +41,16 @@ def __extend_process(process):
         'memory_percent': process.memory_percent(),
         'cwd': process.cwd(),
         'status': process.status(),
-        'exe': process.exe(),
     }
+
+    try:
+        attrs['exe'] = process.exe()
+    except AccessDenied:
+        if attrs['pid'] == koenig_thrift.KERNEL_TASK_PID:
+            attrs['exe'] = 'kernel task not support'
+            logger.info('hit kernel task: [PID:{}]'.format(attrs['pid']))
+        else:
+            raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
 
     attrs['uids'] = serialize(process.uids(), koenig_thrift.TProcessUID)
     attrs['gids'] = serialize(process.gids(), koenig_thrift.TProcessGID)
