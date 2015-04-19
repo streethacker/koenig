@@ -3,6 +3,12 @@
 import psutil
 import logging
 
+import gevent
+
+from gevent import (
+    monkey,
+)
+
 from datetime import (
     datetime,
 )
@@ -27,33 +33,23 @@ from koenig.utils import (
 )
 
 
+monkey.patch_all()
+
+
 logger = logging.getLogger(__name__)
 
 
 def __extend_process(process):
-    attrs = {
-        'pid': process.pid,
-        'ppid': process.ppid(),
-        'name': process.name(),
-        'username': process.username(),
-        'create_time': process.create_time(),
-        'cpu_percent': process.cpu_percent(),
-        'memory_percent': process.memory_percent(),
-        'cwd': process.cwd(),
-        'status': process.status(),
-    }
 
-    try:
-        attrs['exe'] = process.exe()
-    except AccessDenied:
-        if attrs['pid'] == koenig_thrift.KERNEL_TASK_PID:
-            attrs['exe'] = 'kernel task not support'
-            logger.info('hit kernel task: [PID:{}]'.format(attrs['pid']))
-        else:
-            raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
+    attrs = process.as_dict(attrs=[
+        'pid', 'ppid', 'name', 'username', 'create_time',
+        'cpu_percent', 'memory_percent', 'cwd', 'status',
+    ])
 
-    attrs['uids'] = serialize(process.uids(), koenig_thrift.TProcessUID)
-    attrs['gids'] = serialize(process.gids(), koenig_thrift.TProcessGID)
+    # hack trick to call cpu_percent with interval 0.1
+    gevent.sleep(0.1)
+
+    attrs.update(process.as_dict(attrs=['cpu_percent']))
 
     process.__dict__.clear()
     process.__dict__.update(attrs)
@@ -200,21 +196,21 @@ def query_process_by_pid(pid):
 
 def query_processes_by_pids(pids):
 
-    def __gen_process(pids):
-        for pid in pids:
-            try:
-                process = psutil.Process(pid)
-            except AccessDenied:
-                raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
-            except NoSuchProcess:
-                raise_system_exc(KoenigErrorCode.PROCESS_NOT_FOUND)
+    threads = []
 
-            process = __extend_process(process)
+    for pid in pids:
+        try:
+            process = psutil.Process(pid)
+        except AccessDenied:
+            raise_user_exc(KoenigErrorCode.ACCESS_DENIED)
+        except NoSuchProcess:
+            raise_system_exc(KoenigErrorCode.PROCESS_NOT_FOUND)
 
-            yield (pid, process)
+        threads.append(
+            gevent.spawn(__extend_process, process)
+        )
 
-    result = {}
-    for pid, process in __gen_process(pids):
-        result.update({pid: process})
+    gevent.joinall(threads)
 
+    result = {thread.value.__dict__['pid']: thread.value for thread in threads}
     return serialize(result, koenig_thrift.TProcess, _map=True)
