@@ -78,7 +78,7 @@ def query_cpu_percent_percpu(interval):
 
 
 def query_cpu_times_percent(interval):
-    cpu_times_percent = psutil.cpu_times_percent()
+    cpu_times_percent = psutil.cpu_times_percent(interval)
     return serialize(
         cpu_times_percent,
         koenig_thrift.TCPUTimesPercent
@@ -86,7 +86,7 @@ def query_cpu_times_percent(interval):
 
 
 def query_cpu_times_percent_percpu(interval):
-    cpu_times_percent_percpu = psutil.cpu_times_percent(percpu=True)
+    cpu_times_percent_percpu = psutil.cpu_times_percent(interval, percpu=True)
     return serialize(
         cpu_times_percent_percpu,
         koenig_thrift.TCPUTimesPercent,
