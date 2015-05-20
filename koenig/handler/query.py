@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+import gevent
 import psutil
 import logging
 
-import gevent
-
-from gevent import (
-    monkey,
-)
-
-from datetime import (
-    datetime,
-)
+from gevent import monkey
 
 from psutil import (
     AccessDenied,
     NoSuchProcess,
 )
 
-from koenig import (
-    koenig_thrift,
+from koenig import koenig_thrift
+from koenig.models import RuntimeProfile
+
+from koenig.utils import (
+    serialize,
+    datetime2utc,
 )
 
 from koenig.exc import (
@@ -28,14 +26,8 @@ from koenig.exc import (
     KoenigErrorCode,
 )
 
-from koenig.utils import (
-    serialize,
-)
-
 
 monkey.patch_all()
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -81,8 +73,7 @@ def query_cpu_times_percent(interval):
     cpu_times_percent = psutil.cpu_times_percent(interval)
     return serialize(
         cpu_times_percent,
-        koenig_thrift.TCPUTimesPercent
-    )
+        koenig_thrift.TCPUTimesPercent)
 
 
 def query_cpu_times_percent_percpu(interval):
@@ -90,8 +81,7 @@ def query_cpu_times_percent_percpu(interval):
     return serialize(
         cpu_times_percent_percpu,
         koenig_thrift.TCPUTimesPercent,
-        _list=True
-    )
+        _list=True)
 
 
 def query_virtual_memory():
@@ -109,8 +99,7 @@ def query_disk_partitions():
     return serialize(
         disk_partitions,
         koenig_thrift.TDiskPartition,
-        _list=True
-    )
+        _list=True)
 
 
 def query_disk_io_counters():
@@ -123,8 +112,7 @@ def query_disk_io_counters_perdisk():
     return serialize(
         disk_io_counters_perdisk,
         koenig_thrift.TDiskIOCounters,
-        _map=True
-    )
+        _map=True)
 
 
 def query_disk_usage(path):
@@ -140,8 +128,7 @@ def query_net_io_counters():
     net_io_counters = psutil.net_io_counters()
     return serialize(
         net_io_counters,
-        koenig_thrift.TNetworkIOCounters
-    )
+        koenig_thrift.TNetworkIOCounters)
 
 
 def query_net_io_counters_pernic():
@@ -149,8 +136,7 @@ def query_net_io_counters_pernic():
     return serialize(
         net_io_counters_pernic,
         koenig_thrift.TNetworkIOCounters,
-        _map=True
-    )
+        _map=True)
 
 
 def query_net_connections():
@@ -162,8 +148,7 @@ def query_net_connections():
     return serialize(
         net_connections,
         koenig_thrift.TNetworkConnections,
-        _list=True
-    )
+        _list=True)
 
 
 def query_login_users():
@@ -173,7 +158,8 @@ def query_login_users():
 
 def query_boot_time():
     boot_time = psutil.boot_time()
-    return datetime.fromtimestamp(boot_time).strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.datetime.fromtimestamp(boot_time).\
+        strftime('%Y-%m-%d %H:%M:%S')
 
 
 def query_pids():
@@ -206,11 +192,23 @@ def query_processes_by_pids(pids):
         except NoSuchProcess:
             raise_system_exc(KoenigErrorCode.PROCESS_NOT_FOUND)
 
-        threads.append(
-            gevent.spawn(__extend_process, process)
-        )
+        threads.append(gevent.spawn(__extend_process, process))
 
     gevent.joinall(threads)
+    result = {thread.value.__dict__['pid']: thread.value
+              for thread in threads}
 
-    result = {thread.value.__dict__['pid']: thread.value for thread in threads}
     return serialize(result, koenig_thrift.TProcess, _map=True)
+
+
+def query_runtime_statistic():
+    start_ts = datetime.datetime.now().replace(second=0, microsecond=0)
+    end_ts = start_ts - datetime.timedelta(minutes=5)
+
+    profiles = RuntimeProfile.get_by_ts(start_ts, end_ts)
+    for profile in profiles:
+        if profile:
+            profiles.profile_ts = datetime2utc(profile.profile_ts)
+    profiles.sort(key=lambda p: p.profile_ts)
+
+    return serialize(profiles, koenig_thrift.TRuntimeProfile, _list=True)

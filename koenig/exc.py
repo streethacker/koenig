@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from koenig import (
-    koenig_thrift,
-)
+from koenig import koenig_thrift
 
 
 KoenigErrorCode = koenig_thrift.KoenigErrorCode

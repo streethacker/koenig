@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import time
+import datetime
 import logging
 
-from functools import (
-    partial,
-)
-
-from koenig import (
-    koenig_thrift,
-)
+from functools import partial
+from koenig import koenig_thrift
 
 from koenig.exc import (
     raise_user_exc,
@@ -17,6 +14,14 @@ from koenig.exc import (
 
 
 logger = logging.getLogger(__name__)
+
+
+def datetime2utc(dt):
+    return int(time.mktime(dt.timetuple()))
+
+
+def utc2datetime(t):
+    return datetime.datetime.fromtimestamp(t)
 
 
 def __serialize(obj, ttype):

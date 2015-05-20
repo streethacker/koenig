@@ -1,6 +1,12 @@
 namespace py koenig
 
 /**
+* Consts & Typedef
+*/
+
+typedef i64 Timestamp
+
+/**
 * Exceptions
 */
 
@@ -13,6 +19,7 @@ enum KoenigErrorCode {
     PARAMETER_TYPE_INVALID,
     
     // SystemErrors
+    DATABASE_ERROR,
     PROCESS_NOT_FOUND,
 }
 
@@ -214,6 +221,12 @@ struct TProcess {
     12: required TProcessGID gids,    
 }
 
+struct TRuntimeProfile {
+    1: required double cpu_percent,
+    2: required double mem_percent,
+    3: required Timestamp profile_ts,    
+}
+
 
 /**
 * Services
@@ -221,174 +234,163 @@ struct TProcess {
 
 service KoenigService {
     
+    /**
+    * Base APIs
+    */
+
     bool ping()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
+
+
+    void serialize_runtime_statistic()
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
+
+    /**
+    * Inner APIs
+    */
+
+    void process_runtime_statistic(1: double cpu_percent,
+                                   2: double mem_percent,
+                                   3: Timestamp profile_ts)
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
+
 
     /**
     * query cpu info
     */
 
     TCPUTimes query_cpu_times()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     list<TCPUTimes> query_cpu_times_percpu()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     double query_cpu_percent(1: i16 interval)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     list<double> query_cpu_percent_percpu(1: i16 interval)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     TCPUTimesPercent query_cpu_times_percent(1: i16 interval)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     list<TCPUTimesPercent> query_cpu_times_percent_percpu(1: i16 interval)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     /**
     * query memory info
     */
 
     TVirtualMemory query_virtual_memory()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     TSwapMemory query_swap_memory()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     /**
     * query disk info
     */
 
     list<TDiskPartition> query_disk_partitions()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     TDiskIOCounters query_disk_io_counters()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     map<string, TDiskIOCounters> query_disk_io_counters_perdisk()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     TDiskUsage query_disk_usage(1: string path)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     /**
     * query network io info
     */
 
     TNetworkIOCounters query_net_io_counters()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     map<string, TNetworkIOCounters> query_net_io_counters_pernic()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     list<TNetworkConnections> query_net_connections()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     /**
     * query login info
     */
 
     list<TUser> query_login_users()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     string query_boot_time()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     /**
     * query process info
     */
 
     list<i32> query_pids()
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     TProcess query_process_by_pid(1: i32 pid)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 
     map<i32, TProcess> query_processes_by_pids(1: list<i32> pids)
-        throws (
-            1: KoenigUserException user_exception,
-            2: KoenigSystemException system_exception,
-            3: KoenigUnknownException unknown_exception
-        )
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
+
+    /**
+    * query last 5 minutes statistic
+    */
+
+    list<TRuntimeProfile> query_runtime_statistic()
+        throws (1: KoenigUserException user_exception,
+                2: KoenigSystemException system_exception,
+                3: KoenigUnknownException unknown_exception),
 }

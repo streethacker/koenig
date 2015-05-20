@@ -4,6 +4,7 @@ import logging
 
 from koenig.handler import (
     base,
+    inner,
     query,
 )
 
@@ -22,6 +23,19 @@ class KoenigDispatcher(object):
 
     def ping(self):
         return base.ping()
+
+    def serialize_runtime_statistic(self):
+        return base.serialize_runtime_statistic()
+
+    ##############
+    # INNER APIs
+    ##############
+
+    def process_runtime_statistic(self, cpu_percent, mem_percent, profile_ts):
+        return inner.process_runtime_statistic(
+            cpu_percent,
+            mem_percent,
+            profile_ts)
 
     ###############
     # Query APIs
@@ -110,3 +124,10 @@ class KoenigDispatcher(object):
 
     def query_processes_by_pids(self, pids):
         return query.query_processes_by_pids(pids)
+
+    ############################
+    # query last 5 minutes data
+    ############################
+
+    def query_runtime_statistic(self):
+        return query.query_runtime_statistic()

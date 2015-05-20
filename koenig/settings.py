@@ -24,6 +24,23 @@ KOENIG_THRIFT_SETTINGS = {
 
 
 ##############
+# CELERY
+##############
+
+CELERY_BROKER = {
+    'user': 'admin',
+    'password': 'admin',
+    'host': 'localhost',
+    'port': 5672,
+}
+
+CELERY_CONFIG = {
+    'CELERY_TIMEZONE': 'Asia/Shanghai',
+    'CELERY_ENABLE_UTC': True,
+}
+
+
+##############
 # LOGGING
 ##############
 

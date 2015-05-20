@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from thriftpy.rpc import (
-    client_context,
-)
-
-from koenig import (
-    koenig_thrift,
-)
+from thriftpy.rpc import client_context
+from koenig import koenig_thrift
 
 from koenig.settings import (
     KOENIG_THRIFT_SETTINGS,

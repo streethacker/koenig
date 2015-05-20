@@ -2,16 +2,11 @@
 
 import logging
 
-from thriftpy.rpc import (
-    make_server,
-)
+from thriftpy.rpc import make_server
+from koenig import koenig_thrift
 
 from koenig.dispatcher import (
     KoenigDispatcher,
-)
-
-from koenig import (
-    koenig_thrift,
 )
 
 from koenig.settings import (
