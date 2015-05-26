@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import functools
 import time
 import datetime
+
 import logging
 
 from functools import partial
@@ -14,6 +16,17 @@ from koenig.exc import (
 
 
 logger = logging.getLogger(__name__)
+
+
+def profile_(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        delta = time.time() - start
+        logger.info('excute profile: {}|{}'.format(func.__name__, delta))
+        return result
+    return wrapper
 
 
 def datetime2utc(dt):

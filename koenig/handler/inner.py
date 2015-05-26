@@ -2,7 +2,10 @@
 
 import logging
 
-from koenig.utils import utc2datetime
+from koenig.utils import (
+    profile_,
+    utc2datetime,
+)
 
 from koenig.models import (
     db_commit,
@@ -14,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @db_commit
+@profile_
 def process_runtime_statistic(cpu_percent, mem_percent,
                               profile_ts):
 

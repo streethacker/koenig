@@ -31,7 +31,8 @@ class KoenigDispatcher(object):
     # INNER APIs
     ##############
 
-    def process_runtime_statistic(self, cpu_percent, mem_percent, profile_ts):
+    def process_runtime_statistic(self, cpu_percent,
+                                  mem_percent, profile_ts):
         return inner.process_runtime_statistic(
             cpu_percent,
             mem_percent,

@@ -5,7 +5,10 @@ import psutil
 
 import logging
 
-from koenig.utils import datetime2utc
+from koenig.utils import (
+    profile_,
+    datetime2utc,
+)
 
 from koenig.utils.async import (
     send_task,
@@ -18,6 +21,7 @@ def ping():
     return True
 
 
+@profile_
 def serialize_runtime_statistic():
     cpu_percent = psutil.cpu_percent(0.1)
     mem_percent = psutil.virtual_memory().percent
