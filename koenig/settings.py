@@ -39,6 +39,18 @@ CELERY_CONFIG = {
     'CELERY_ENABLE_UTC': True,
 }
 
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE = {
+    # koenig
+    'serialize_runtime_statistic': {
+        'task': 'koenig.utils.async.async_api',
+        'schedule': crontab(minute='*/1'),
+        'args': ('koenig', 'serialize_runtime_statistic'),
+        'options': {'queue': 'koenig_queue'},
+    }
+}
+
 
 ##############
 # LOGGING

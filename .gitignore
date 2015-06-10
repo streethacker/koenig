@@ -60,3 +60,5 @@ install.record
 *.swp
 *.swo
 .DS_Store
+celerybeat-schedule.db
+celerybeat.pid
