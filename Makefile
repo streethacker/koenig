@@ -6,7 +6,7 @@ help:
 	@echo '    make install    install as a package '
 
 requirements:
-	pip install -r requirements.txt
+	pip install -i http://pypi.douban.com/simple -r requirements.txt
 
 develop: requirements
 	python setup.py develop
