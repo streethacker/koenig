@@ -6,7 +6,7 @@ help:
 	@echo '    make install    install as a package '
 
 requirements:
-	pip install -i http://pypi.douban.com/simple -r requirements.txt
+	pip install -i http://pypi.douban.com/simple -r requirements.txt --trusted-host pypi.douban.com
 
 develop: requirements
 	python setup.py develop
